@@ -1,12 +1,12 @@
 use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
-use std::{fs, ops::Add, path::Path, path::PathBuf};
+use std::{fs, path::Path, path::PathBuf};
 
 fn main() {
     let search_path = Path::new("/home/aaq");
     let mut total_size: u64 = 0;
     search_folder(search_path.to_path_buf(), &mut total_size);
-    println!("TOTAL SIZE {}", total_size);
+    println!("TOTAL SIZE {}", human_bytes(total_size as f64));
 }
 
 fn search_folder(folder: PathBuf, total_size: &mut u64) {
