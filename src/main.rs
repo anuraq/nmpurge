@@ -1,49 +1,27 @@
-use std::{fs, path::Path, path::PathBuf};
-
-// fn print_type_of<T>(_: &T) {
-//     println!("{}", std::any::type_name::<T>())
-// }
+use fs_extra::dir::get_size;
+use human_bytes::human_bytes;
+use std::{fs, ops::Add, path::Path, path::PathBuf};
 
 fn main() {
-    // let stack: Vec<PathBuf> = vec![];
-    // let path: &'static str = "/home/aaq";
-    // let dirs = fs::read_dir(path)
-    //     .expect("dir not fount")
-    //     .map(|x| x.unwrap().path())
-    //     .filter(|x| x.is_dir())
-    //     .collect::<Vec<PathBuf>>();
-    // for i in dirs.iter() {
-    //     println!("{:?}", i);
-    // }
-    // print_type_of(&dirs);
-    // println!(
-    //     "{:?}",
-    //     fs::read_dir(&dirs[0])
-    //         .expect("dir not fount")
-    //         .map(|x| x.unwrap().path())
-    //         .filter(|x| x.is_dir())
-    //         .collect::<Vec<PathBuf>>()
-    // );
     let search_path = Path::new("/home/aaq");
-    search_folder(search_path.to_path_buf());
+    let mut total_size: u64 = 0;
+    search_folder(search_path.to_path_buf(), &mut total_size);
+    println!("TOTAL SIZE {}", total_size);
 }
 
-fn search_folder(folder: PathBuf) {
+fn search_folder(folder: PathBuf, total_size: &mut u64) {
     for entry in fs::read_dir(folder)
-        .expect("cant read")
+        .expect(&format!("read {}", human_bytes(*total_size as f64)))
         .map(|x| x.expect("cant map"))
         .filter(|x| x.file_type().expect("cant file type").is_dir())
     {
         if entry.file_name().eq("node_modules") {
-            println!("node_modules found {}", entry.path().display());
+            let path_size = get_size(entry.path()).unwrap();
+            *total_size += path_size;
+            let human_size = human_bytes(path_size as f64);
+            println!("{} {}", human_size, entry.path().display());
         } else {
-            search_folder(entry.path());
+            search_folder(entry.path(), total_size);
         }
     }
 }
-// for entry in fs::read_dir("/home/aaq/code/").unwrap() {
-//     let entry = entry.unwrap();
-//     if entry.path().is_dir() {
-//         println!("{}", entry.path().display());
-//     }
-// }
